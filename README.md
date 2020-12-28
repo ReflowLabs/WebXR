@@ -10,7 +10,7 @@ Within this repo are 7 folders containing source code for boilerplate and sample
 - **02-r3f-xr** A couple of r3f demos using WebXR
 - **03-babylon-react-playground** Source code for the playbook below
 - **04-next-react-babylonjs-starter** boilerplate for nextjs and react-babylon
-- **04-brxr-testing** react-babylon demos that we'll play with in the presentation
+- **05-brxr-testing** react-babylon demos that we'll play with in the presentation
 - **06-brxr-game** A simple game created with react babylon
 
 ⭐️ = Recommended
