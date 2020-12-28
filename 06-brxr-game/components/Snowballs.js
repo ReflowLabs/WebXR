@@ -6,6 +6,7 @@ import {
   BezierCurveEase,
   Color3,
   FresnelParameters,
+  WebXRState,
 } from "@babylonjs/core";
 import { useEffect, useRef } from "react";
 import { Mesh, Texture, useBabylonScene } from "react-babylonjs";
@@ -14,6 +15,7 @@ import { PhysicsImpostor } from "@babylonjs/core";
 let observers = {};
 let meshesUnderPointer = {};
 
+const PRECISION = 2;
 const tmpVec = new Vector3();
 const tmpRay = new Ray();
 tmpRay.origin = new Vector3();
@@ -24,7 +26,6 @@ const oldPos = new Vector3();
 function Snowall({ position }) {
   const sphereRef = useRef();
   const scene = useBabylonScene();
-
   function resetPos(mesh) {
     mesh.position.x = position.x;
     mesh.position.y = position.y;
@@ -37,12 +38,11 @@ function Snowall({ position }) {
     if (mesh.position.y < -0.1) {
       resetPos(mesh);
     }
-    // const dude = scene.getMeshByName("dude");
     scene.meshes
       .filter((m) => m.name == "dude")
       .forEach((m) => {
         if (mesh.intersectsMesh(m, true)) {
-          console.log("bam");
+          // onHit();
           resetPos(mesh);
         }
       });
@@ -53,7 +53,6 @@ function Snowall({ position }) {
       name="sphere"
       diameter={0.2}
       checkCollisions
-      onCollide={() => console.log("yo")}
       segments={16}
       position={position}
     >
@@ -94,16 +93,48 @@ function Snowall({ position }) {
   );
 }
 
-export default function Snowballs() {
+export default function Snowballs({ update }) {
   const scene = useBabylonScene();
   const xrRef = useRef();
   useEffect(() => {
     (async () => {
       const xr = await WebXRDefaultExperience.CreateAsync(scene);
-      console.log("creating", xr);
       xrRef.current = xr;
+      xr.baseExperience.onStateChangedObservable.add((state) => {
+        if (state === WebXRState.IN_XR) {
+          scene.onBeforeCameraRenderObservable.add(() => {
+            if (xr.baseExperience.camera.rightCamera) {
+              const {
+                rotationQuaternion: rotation,
+              } = xr.baseExperience.camera.rightCamera;
+              update(() => ({
+                hrx: rotation._x.toFixed(PRECISION),
+                hry: rotation._y.toFixed(PRECISION),
+                hrz: rotation._z.toFixed(PRECISION),
+                // hpx: position._x.toFixed(PRECISION),
+                // hpy: position._y.toFixed(PRECISION),
+                // hpz: position._z.toFixed(PRECISION),
+              }));
+            }
+          });
+        }
+      });
+      // xr.input.on
       xr.input.onControllerAddedObservable.add((controller) => {
         controller.onMotionControllerInitObservable.add((motionController) => {
+          // handle movement updates
+          xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
+            const prefix = motionController.handness[0]; // l or r
+            const position = controller.grip
+              ? controller.grip.position
+              : controller.pointer.position;
+            update(() => ({
+              [`${prefix}px`]: position._x.toFixed(PRECISION),
+              [`${prefix}py`]: position._y.toFixed(PRECISION),
+              [`${prefix}pz`]: position._z.toFixed(PRECISION),
+            }));
+          });
+          // handle squeeze trigger events
           if (motionController.handness === "left") {
             const squeeze = motionController.getComponentOfType("squeeze");
             if (squeeze) {
@@ -210,15 +241,17 @@ export default function Snowballs() {
     };
   }, []);
 
-  return (
-    <>
-      {new Array(20).fill(null).map((n, i) => (
-        <Snowall
-          key={i}
-          position={new Vector3(i * 0.01 * 3 - 3, 0.2 + i * 0.1, -3)}
-        />
-      ))}
-      <Snowall position={new Vector3(0, 10, 0)} />
-    </>
-  );
+  return <Snowall position={new Vector3(0, 0.5, -4)} />;
+  // return (
+  //   <>
+  //     {/* {new Array(15).fill(null).map((n, i) => (
+  //       <Snowall
+  //         key={i}
+  //         position={new Vector3(-2 + i * 0.3, 0.5, -4)}
+  //         // onHit={onHit}
+  //       />
+  //     ))} */}
+
+  //   </>
+  // );
 }

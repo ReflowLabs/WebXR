@@ -21,15 +21,13 @@ const World = () => {
         <Hovering>
           <Yellow />
         </Hovering>
-        {/* <holographicButton text="Hello!" scaling={new Vector3(20, 20, 20)} /> */}
         <freeCamera
           name="camera1"
           position={new Vector3(0, 5, -10)}
           target={Vector3.Zero()}
         />
-
         <vrExperienceHelper teleportEnvironmentGround />
-        <environmentHelper enableGroundShadow groundYBias={1} />
+        {/* <environmentHelper enableGroundShadow groundYBias={1} /> */}
       </Scene>
     </Engine>
   );

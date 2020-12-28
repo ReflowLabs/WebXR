@@ -9,18 +9,18 @@ const Photo = () => {
     <Engine canvasId="canvas">
       <Scene
         onSceneMount={({ scene }) => {
-          // new PhotoDome(
-          //   'testdome',
-          //   './dome.jpg',
-          //   { resolution: 64, size: 512 },
-          //   scene
-          // );
-          new VideoDome(
-            'videodome',
-            './riding.mp4',
-            { resolution: 64, clickToPlay: true },
+          new PhotoDome(
+            'testdome',
+            './dome.jpg',
+            { resolution: 64, size: 512 },
             scene
           );
+          // new VideoDome(
+          //   'videodome',
+          //   './riding.mp4',
+          //   { resolution: 64, clickToPlay: true },
+          //   scene
+          // );
         }}
       >
         <hemisphericLight

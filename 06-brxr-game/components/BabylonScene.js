@@ -1,33 +1,21 @@
-import React, { useRef } from "react";
 import "@babylonjs/core/Physics/physicsEngineComponent"; // side-effect adds scene.enablePhysics function
 import { Vector3, PhysicsImpostor } from "@babylonjs/core";
 import { CannonJSPlugin } from "@babylonjs/core/Physics/Plugins";
 import { Scene, Engine } from "react-babylonjs";
-
 import * as CANNON from "cannon";
-// import Snowballs from "./Snowballs";
-import Dude from "./Dude";
+
 import Inspector from "./Inspector";
-import Snowballs from "./Snowballs";
+
 window.CANNON = CANNON;
 
 const gravityVector = new Vector3(0, -9.81, 0);
 
-const App = () => {
-  function meshPicked(e) {
-    if (e.id === "sphere1") {
-      e.physicsImpostor.applyImpulse(
-        Vector3.Up().scale(10),
-        e.getAbsolutePosition()
-      );
-    }
-  }
+const BabylonScene = ({ children }) => {
   return (
-    <Engine antialias={true} adaptToDeviceRatio={true} canvasId="canvas">
+    <Engine antialias adaptToDeviceRatio canvasId="canvas">
       <Scene
         collisionsEnabled
         enablePhysics={[gravityVector, new CannonJSPlugin()]}
-        onMeshPicked={meshPicked}
       >
         {/* <Inspector /> */}
         <arcRotateCamera
@@ -66,11 +54,10 @@ const App = () => {
             depthScale={100}
           />
         </directionalLight>
-
         <ground
           name="ground"
-          width={100}
-          height={100}
+          width={50}
+          height={50}
           subdivisions={2}
           receiveShadows={true}
         >
@@ -79,10 +66,9 @@ const App = () => {
             _options={{ mass: 0, restitution: 0.6 }}
           />
         </ground>
-        <Snowballs />
-        <Dude />
+        {children}
       </Scene>
     </Engine>
   );
 };
-export default App;
+export default BabylonScene;
