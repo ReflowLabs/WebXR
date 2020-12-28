@@ -8,12 +8,14 @@ import {
   FresnelParameters,
   WebXRState,
 } from "@babylonjs/core";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Mesh, Texture, useBabylonScene } from "react-babylonjs";
 import { PhysicsImpostor } from "@babylonjs/core";
 
 let observers = {};
 let meshesUnderPointer = {};
+let updaters = {};
+const UPDATE_INTERVAL = 50;
 
 const PRECISION = 2;
 const tmpVec = new Vector3();
@@ -23,8 +25,9 @@ tmpRay.direction = new Vector3();
 let lastTimestamp = 0;
 const oldPos = new Vector3();
 
-function Snowall({ position }) {
+function Snowall({ position, update }) {
   const sphereRef = useRef();
+  const lastTriggered = useRef();
   const scene = useBabylonScene();
   function resetPos(mesh) {
     mesh.position.x = position.x;
@@ -42,8 +45,11 @@ function Snowall({ position }) {
       .filter((m) => m.name == "dude")
       .forEach((m) => {
         if (mesh.intersectsMesh(m, true)) {
-          // onHit();
           resetPos(mesh);
+          if ((lastTriggered.current || 0) < new Date().getTime() - 1000) {
+            lastTriggered.current = new Date().getTime();
+            update((s) => ({ score: s.score + 1 }));
+          }
         }
       });
   });
@@ -104,6 +110,13 @@ export default function Snowballs({ update }) {
         if (state === WebXRState.IN_XR) {
           scene.onBeforeCameraRenderObservable.add(() => {
             if (xr.baseExperience.camera.rightCamera) {
+              if (
+                (updaters.head || 0) >
+                new Date().getTime() - UPDATE_INTERVAL
+              ) {
+                return null;
+              }
+              updaters.head = new Date().getTime();
               const {
                 rotationQuaternion: rotation,
               } = xr.baseExperience.camera.rightCamera;
@@ -111,9 +124,6 @@ export default function Snowballs({ update }) {
                 hrx: rotation._x.toFixed(PRECISION),
                 hry: rotation._y.toFixed(PRECISION),
                 hrz: rotation._z.toFixed(PRECISION),
-                // hpx: position._x.toFixed(PRECISION),
-                // hpy: position._y.toFixed(PRECISION),
-                // hpz: position._z.toFixed(PRECISION),
               }));
             }
           });
@@ -128,6 +138,13 @@ export default function Snowballs({ update }) {
             const position = controller.grip
               ? controller.grip.position
               : controller.pointer.position;
+            if (
+              (updaters[prefix] || 0) >
+              new Date().getTime() - UPDATE_INTERVAL
+            ) {
+              return null;
+            }
+            updaters[prefix] = new Date().getTime();
             update(() => ({
               [`${prefix}px`]: position._x.toFixed(PRECISION),
               [`${prefix}py`]: position._y.toFixed(PRECISION),
@@ -158,7 +175,7 @@ export default function Snowballs({ update }) {
                       );
                     }
                     if (mesh && mesh.id !== "ground" && mesh.physicsImpostor) {
-                      const animatable = Animation.CreateAndStartAnimation(
+                      Animation.CreateAndStartAnimation(
                         "meshmove",
                         mesh,
                         "position",
@@ -241,17 +258,5 @@ export default function Snowballs({ update }) {
     };
   }, []);
 
-  return <Snowall position={new Vector3(0, 0.5, -4)} />;
-  // return (
-  //   <>
-  //     {/* {new Array(15).fill(null).map((n, i) => (
-  //       <Snowall
-  //         key={i}
-  //         position={new Vector3(-2 + i * 0.3, 0.5, -4)}
-  //         // onHit={onHit}
-  //       />
-  //     ))} */}
-
-  //   </>
-  // );
+  return <Snowall update={update} position={new Vector3(0, 0.5, -4)} />;
 }

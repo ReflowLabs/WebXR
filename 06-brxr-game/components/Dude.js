@@ -55,13 +55,13 @@ const Dude = ({ state, scaling = new Vector3(0.05, 0.05, 0.05) }) => {
         const lZ = (parseFloat(state.lpz) + 7.5) * 60;
         leftTargetRef.current.hostInstance.position.x = lX;
         leftTargetRef.current.hostInstance.position.y = lY + 12;
-        leftTargetRef.current.hostInstance.position.z = lZ + 8;
+        leftTargetRef.current.hostInstance.position.z = lZ + 10;
         const rX = parseFloat(state.rpx) * 60;
         const rY = parseFloat(state.rpy) * 60;
         const rZ = (parseFloat(state.rpz) + 7.5) * 60;
         rightTargetRef.current.hostInstance.position.x = rX;
         rightTargetRef.current.hostInstance.position.y = rY + 12;
-        rightTargetRef.current.hostInstance.position.z = rZ + 8;
+        rightTargetRef.current.hostInstance.position.z = rZ + 10;
         armLeftRef.current.update();
         armRightRef.current.update();
       } catch (e) {
@@ -74,11 +74,15 @@ const Dude = ({ state, scaling = new Vector3(0.05, 0.05, 0.05) }) => {
     <>
       <sphere
         ref={leftPoleTargetRef}
+        scaling={new Vector3(0, 0, 0)}
         position={new Vector3(-2, 4, -4)}
-        scaling={new Vector3(0.5, 0.5, 0.5)}
+      />
+      <sphere
+        ref={rightPoleTargetRef}
+        scaling={new Vector3(0, 0, 0)}
+        position={new Vector3(2, 4, -4)}
       />
       <sphere ref={leftTargetRef} />
-      <sphere ref={rightPoleTargetRef} position={new Vector3(2, 4, -4)} />
       <sphere ref={rightTargetRef} />
       <Model
         rootUrl="/"

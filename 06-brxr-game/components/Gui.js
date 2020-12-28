@@ -2,7 +2,8 @@ import { Vector3 } from "@babylonjs/core";
 import { Texture } from "react-babylonjs";
 
 const Gui = ({ state }) => {
-  const text = JSON.stringify(state, null, 2);
+  // const text = JSON.stringify(state, null, 2);
+  const text = `Score: ${state.score || 0}`;
   return (
     <>
       <plane
@@ -31,7 +32,7 @@ const Gui = ({ state }) => {
             <textBlock
               text={text}
               fontStyle="bold"
-              fontSize={30}
+              fontSize={50}
               textHorizontalAlignment="left"
               color="white"
             />
